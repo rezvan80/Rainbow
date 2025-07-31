@@ -239,10 +239,11 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
   for _ in range(args.evaluation_episodes):
     while True:
       if done:
-        state, reward_sum, done = env.reset(), 0, False
+        reward_sum, done = 0, False
+        state, _  = env.reset()
 
       action = dqn.act_e_greedy(state)  # Choose an action ε-greedily
-      state, reward, done = env.step(action)  # Step
+      state, reward, done , _ , _ = env.step(action)  # Step
       reward_sum += reward
       if args.render:
         env.render()
