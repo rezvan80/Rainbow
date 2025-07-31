@@ -288,9 +288,10 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
       if done:
         reward_sum, done = 0, False
         state, _  = env.reset()
-
+        state=torch.tensor(state)
       action = dqn.act_e_greedy(state)  # Choose an action ε-greedily
       state, reward, done , _ , _ = env.step(action)  # Step
+      state=torch.tensor(state)
       reward_sum += reward
       if args.render:
         env.render()
