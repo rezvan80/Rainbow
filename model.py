@@ -47,7 +47,7 @@ class NoisyLinear(nn.Module):
 
 
 class DQN(nn.Module):
-  def __init__(self, args, action_space):
+  def __init__(self, args, action_space  , obs_dim):
     super(DQN, self).__init__()
     self.atoms = args.atoms
     self.action_space = action_space
@@ -63,8 +63,7 @@ class DQN(nn.Module):
     self.conv_output_size = 64
     self.covs=nn.Sequential(
             nn.Linear(obs_dim, 64), nn.ReLU(),
-            nn.Linear(64, 64), nn.ReLU(),
-            nn.Linear(64, n_actions)
+            nn.Linear(64, 64), nn.ReLU()
         )
     self.fc_h_v = NoisyLinear(self.conv_output_size, args.hidden_size, std_init=args.noisy_std)
     self.fc_h_a = NoisyLinear(self.conv_output_size, args.hidden_size, std_init=args.noisy_std)
