@@ -318,6 +318,9 @@ class charging_stationEnv5(gym.Env):
 
             # Plot the graph using ox.plot_graph
         ox.plot_graph(G, node_color=node_color , node_size=30, figsize=(10, 8))
+n_ev=20
+env=charging_stationEnv5(G, charging_station_nodes , n_ev)
+
 action_space = env.action_space.n
 
 # Agent
