@@ -346,9 +346,9 @@ val_mem = ReplayMemory(args, args.evaluation_size)
 T, done = 0, True
 while T < args.evaluation_size:
   if done:
-    state = env.reset()
+    state , _ = env.reset()
 
-  next_state, _, done = env.step(np.random.randint(0, action_space))
+  next_state, _, done , _ , _ = env.step(np.random.randint(0, action_space))
   val_mem.append(state, -1, 0.0, done)
   state = next_state
   T += 1
@@ -363,13 +363,13 @@ else:
   done = True
   for T in trange(1, args.T_max + 1):
     if done:
-      state = env.reset()
+      state , _ = env.reset()
 
     if T % args.replay_frequency == 0:
       dqn.reset_noise()  # Draw a new set of noisy weights
 
     action = dqn.act(state)  # Choose an action greedily (with noisy weights)
-    next_state, reward, done = env.step(action)  # Step
+    next_state, reward, done , _ , _ = env.step(action)  # Step
     if args.reward_clip > 0:
       reward = max(min(reward, args.reward_clip), -args.reward_clip)  # Clip rewards
     mem.append(state, action, reward, done)  # Append transition to memory
