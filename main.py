@@ -98,7 +98,22 @@ def save_memory(memory, memory_path, disable_bzip):
   else:
     with bz2.open(memory_path, 'wb') as zipped_pickle_file:
       pickle.dump(memory, zipped_pickle_file)
-
+def subtract_from_list(list_of_lists, value):
+    for sublist in list_of_lists:
+        value1 = value
+        i = 0
+        while value1 > 0 and i < len(sublist):
+            if sublist[i] >= value1:
+                sublist[i] -= value1
+                value1 = 0
+            else:
+                value1 -= sublist[i]
+                sublist[i] = 0
+                i += 1
+        # Now remove all zero values from this sublist
+        # Use list comprehension for in-place update
+        sublist[:] = [x for x in sublist if x != 0]
+    return list_of_lists
 import osmnx as ox
 import networkx as nx
 import random
