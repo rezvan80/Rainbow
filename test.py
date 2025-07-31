@@ -7,6 +7,7 @@ from plotly.graph_objs.scatter import Line
 import torch
 import osmnx as ox
 import networkx as nx
+import numpy as np
 import random
 import torch
 def subtract_from_list(list_of_lists, value):
