@@ -114,6 +114,36 @@ def subtract_from_list(list_of_lists, value):
         # Use list comprehension for in-place update
         sublist[:] = [x for x in sublist if x != 0]
     return list_of_lists
+import math
+def fcc_encoder(arrs, ch_time , values):
+    fcc=[]
+    arrs=arrs.tolist()
+    ch_time=ch_time.tolist()
+    values=values.tolist()
+    for arr, value in zip(arrs, values):
+      sorted_arr = list(enumerate(arr))
+      sorted_arr = [item for item in sorted_arr if (item[1] is not None and item[1] < value ) ]
+      sorted_arr.sort(key=lambda item: item[1], reverse=True)
+      indices_to_save=[]
+
+      s=value
+      for i in range(0 , len(sorted_arr)-1):
+
+            diff=s-sorted_arr[i][1]
+            s=sorted_arr[i][1]
+            if diff>ch_time[sorted_arr[i][0]]:
+
+              break
+
+            indices_to_save.append(sorted_arr[i][0])
+
+      fcc.append(
+      sum([ch_time[i] for i in indices_to_save]) + arr[indices_to_save[-1]] - value
+      if indices_to_save
+      else 0
+      )
+    fcc = nn.functional.softmax(torch.tensor(fcc).float()  , dim=0)
+    return fcc
 import osmnx as ox
 import networkx as nx
 import random
