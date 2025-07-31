@@ -214,7 +214,7 @@ class charging_stationEnv5(gym.Env):
                 for charging_station in self.charging_station_nodes
             ])
 
-        self.fcc[self.j].extend(fcc_encoder(self.station_arr , self.charging_time , self.arrival_time))
+        #self.fcc[self.j].extend(fcc_encoder(self.station_arr , self.charging_time , self.arrival_time))
 
               #reward=-np.sum(fcc_encoder(self.station_arr , self.charging_time , self.arrival_time))
 
