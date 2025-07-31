@@ -8,6 +8,7 @@ import torch
 import osmnx as ox
 import networkx as nx
 import random
+import torch
 def subtract_from_list(list_of_lists, value):
     for sublist in list_of_lists:
         value1 = value
