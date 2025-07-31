@@ -142,7 +142,7 @@ def fcc_encoder(arrs, ch_time , values):
       if indices_to_save
       else 0
       )
-    fcc = nn.functional.softmax(torch.tensor(fcc).float()  , dim=0)
+    #fcc = nn.functional.softmax(torch.tensor(fcc).float()  , dim=0)
     return fcc
 import osmnx as ox
 import networkx as nx
