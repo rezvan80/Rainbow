@@ -61,7 +61,7 @@ class DQN(nn.Module):
     #self.convs = nn.Sequential(nn.Conv2d(args.history_length, 32, 5, stride=5, padding=0), nn.ReLU(),
     #nn.Conv2d(32, 64, 5, stride=5, padding=0), nn.ReLU())
     self.conv_output_size = 64
-    self.covs=nn.Sequential(
+    self.convs=nn.Sequential(
             nn.Linear(obs_dim, 64), nn.ReLU(),
             nn.Linear(64, 64), nn.ReLU()
         )
