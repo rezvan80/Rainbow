@@ -38,7 +38,7 @@ class Agent():
 
     self.online_net.train()
 
-    self.target_net = DQN(args, self.action_space).to(device=args.device)
+    self.target_net = DQN(args, self.action_space , self.obs_dim).to(device=args.device)
     self.update_target_net()
     self.target_net.train()
     for param in self.target_net.parameters():
