@@ -52,15 +52,20 @@ class DQN(nn.Module):
     self.atoms = args.atoms
     self.action_space = action_space
 
-    if args.architecture == 'canonical':
-      self.convs = nn.Sequential(nn.Conv2d(args.history_length, 32, 8, stride=4, padding=0), nn.ReLU(),
-                                 nn.Conv2d(32, 64, 4, stride=2, padding=0), nn.ReLU(),
-                                 nn.Conv2d(64, 64, 3, stride=1, padding=0), nn.ReLU())
-      self.conv_output_size = 3136
-    elif args.architecture == 'data-efficient':
-      self.convs = nn.Sequential(nn.Conv2d(args.history_length, 32, 5, stride=5, padding=0), nn.ReLU(),
-                                 nn.Conv2d(32, 64, 5, stride=5, padding=0), nn.ReLU())
-      self.conv_output_size = 576
+    #if args.architecture == 'canonical':
+      #self.convs = nn.Sequential(nn.Conv2d(args.history_length, 32, 8, stride=4, padding=0), nn.ReLU(),
+      #nn.Conv2d(32, 64, 4, stride=2, padding=0), nn.ReLU(),
+      #nn.Conv2d(64, 64, 3, stride=1, padding=0), nn.ReLU())
+    #self.conv_output_size = 3136
+    #elif args.architecture == 'data-efficient':
+    #self.convs = nn.Sequential(nn.Conv2d(args.history_length, 32, 5, stride=5, padding=0), nn.ReLU(),
+    #nn.Conv2d(32, 64, 5, stride=5, padding=0), nn.ReLU())
+    self.conv_output_size = 64
+    self.covs=nn.Sequential(
+            nn.Linear(obs_dim, 64), nn.ReLU(),
+            nn.Linear(64, 64), nn.ReLU(),
+            nn.Linear(64, n_actions)
+        )
     self.fc_h_v = NoisyLinear(self.conv_output_size, args.hidden_size, std_init=args.noisy_std)
     self.fc_h_a = NoisyLinear(self.conv_output_size, args.hidden_size, std_init=args.noisy_std)
     self.fc_z_v = NoisyLinear(args.hidden_size, self.atoms, std_init=args.noisy_std)
