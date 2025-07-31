@@ -11,7 +11,8 @@ from model import DQN
 
 class Agent():
   def __init__(self, args, env):
-    self.action_space = env.action_space()
+    self.action_space = env.action_space.n
+    self.obs_dim=env.observation_space.shape[0]
     self.atoms = args.atoms
     self.Vmin = args.V_min
     self.Vmax = args.V_max
@@ -22,7 +23,7 @@ class Agent():
     self.discount = args.discount
     self.norm_clip = args.norm_clip
 
-    self.online_net = DQN(args, self.action_space).to(device=args.device)
+    self.online_net = DQN(args, self.action_space  , self.obs_dim).to(device=args.device)
     if args.model:  # Load pretrained model if provided
       if os.path.isfile(args.model):
         state_dict = torch.load(args.model, map_location='cpu')  # Always load tensors onto CPU by default, will shift to GPU if necessary
