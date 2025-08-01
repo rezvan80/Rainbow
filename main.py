@@ -423,7 +423,7 @@ else:
     done[i] = True
   for T in trange(1, args.T_max + 1):
     for i in range(n_ev):
-      
+      env.j=i
       if done[i] == True:
         print("4" , env.current_node[i])
         state[i] , _ = env.reset()
