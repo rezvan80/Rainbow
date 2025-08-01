@@ -399,15 +399,16 @@ priority_weight_increase = (1 - args.priority_weight) / (args.T_max - args.learn
 val_mem = ReplayMemory(args, args.evaluation_size)
 val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
 for i in range(n_ev):
-  
-    T, done[i] = 0, True
-while T < args.evaluation_size:
-
-  for i in range(n_ev):
     env.j=i
-    if done[i]:
-      state[i] , _ = env.reset()
-      state[i] = torch.tensor(state[i], dtype=torch.float32, device='cpu')
+    T, done[i] = 0, False
+    state[i] , _ = env.reset()
+    state[i] = torch.tensor(state[i] , dtype = torch.float32 , device = 'cpu')
+while T < args.evaluation_size:
+ while(all(done)==False):
+  for i in range(n_ev):
+   if done[i]==False:
+
+
     next_state[i], _, done[i] , _ , _ = env.step(np.random.randint(0, action_space))
     next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
     val_mem[i].append(state[i], -1, 0.0, done[i])
@@ -447,7 +448,7 @@ else:
         reward[i] = max(min(reward[i], args.reward_clip), -args.reward_clip)  # Clip rewards
       mem[i].append(state[i], action[i], reward[i], done[i])  # Append transition to memory
 
-    # Train and test
+      # Train and test
       if T >= args.learn_start:
         mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
 
