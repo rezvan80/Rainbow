@@ -304,6 +304,7 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
       state[i] = torch.tensor(state[i] ,  dtype = torch.float32 , device = 'cpu')
     while all(done) == False:
       for i in range(n_ev):
+       env.j=i
        if done[i] == False:
 
         action[i] = dqn[i].act_e_greedy(state[i])  # Choose an action ε-greedily
