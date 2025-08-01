@@ -311,9 +311,9 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
           
         
 
-        # Test Q-values over validation memory
-        for state[i] in val_mem[i]:  # Iterate over valid states
-          T_Qs.append(dqn[i].evaluate_q(state[i]))
+       # Test Q-values over validation memory
+       for state[i] in val_mem[i]:  # Iterate over valid states
+         T_Qs.append(dqn[i].evaluate_q(state[i]))
 
   avg_reward, avg_Q = sum(T_rewards) / len(T_rewards), sum(T_Qs) / len(T_Qs)
   if not evaluate:
