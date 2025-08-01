@@ -464,7 +464,7 @@ else:
 
         if T % args.evaluation_interval == 0:
           dqn[i].eval()  # Set DQN (online network) to evaluation mode
-          avg_reward[i], avg_Q[i] = test(args, T, dqn[i], val_mem[i], metrics, results_dir)  # Test
+          avg_reward[i], avg_Q[i] = test(args, T, dqn, val_mem, metrics, results_dir)  # Test
           log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
           dqn[i].train()  # Set DQN (online network) back to training mode
 
