@@ -284,6 +284,7 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
   state=[None]*n_ev
   action=[None]*n_ev
   done=[None]*n_ev
+  reward=[None]*n_ev
   reward_sum=[None]*n_ev
   metrics['steps'].append(T)
   T_rewards, T_Qs = [], []
