@@ -433,7 +433,7 @@ else:
     env.j=i
     dqn[i].train()
 
-  for T in trange(1, args.T_max + 1):
+  for T in range(1, args.T_max + 1):
    done[i] = False
    state[i] , _ = env.reset()
    state[i] = torch.tensor(state[i] , dtype=torch.float32 , device='cpu')
@@ -461,25 +461,25 @@ else:
 
         if T % args.replay_frequency == 0:
           dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
+       state[i] = next_state[i]
+   if T % args.evaluation_interval == 0:
+        dqn[i].eval()  # Set DQN (online network) to evaluation mode
+        avg_reward[i], avg_Q[i] = test(args, T, dqn, val_mem, metrics, results_dir)  # Test
+        log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
+        dqn[i].train()  # Set DQN (online network) back to training mode
 
-        if T % args.evaluation_interval == 0:
-          dqn[i].eval()  # Set DQN (online network) to evaluation mode
-          avg_reward[i], avg_Q[i] = test(args, T, dqn, val_mem, metrics, results_dir)  # Test
-          log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
-          dqn[i].train()  # Set DQN (online network) back to training mode
+      # If memory path provided, save it
+      if args.memory is not None:
+        save_memory(mem[i], args.memory, args.disable_bzip_memory)
 
-        # If memory path provided, save it
-        if args.memory is not None:
-          save_memory(mem[i], args.memory, args.disable_bzip_memory)
+   # Update target network
+   if T % args.target_update == 0:
+       dqn[i].update_target_net()
 
-      # Update target network
-      if T % args.target_update == 0:
-        dqn[i].update_target_net()
+   # Checkpoint the network
+   if (args.checkpoint_interval != 0) and (T % args.checkpoint_interval == 0):
+      dqn[i].save(results_dir, 'checkpoint.pth')
 
-      # Checkpoint the network
-      if (args.checkpoint_interval != 0) and (T % args.checkpoint_interval == 0):
-        dqn[i].save(results_dir, 'checkpoint.pth')
+   
 
-    state[i] = next_state[i]
 
-env.close()
