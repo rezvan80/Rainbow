@@ -256,7 +256,7 @@ class charging_stationEnv5(gym.Env):
 
     def step(self , action ):
 
-        print(self.current_node[self.j])
+        
         self.done[self.j] = False
         shortest_path = nx.shortest_path(self.graph, source=self.current_node[self.j], target=self.charging_station_nodes[action], weight="length")
         """ Take a step in the environment with the given action. """
