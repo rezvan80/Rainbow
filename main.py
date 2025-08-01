@@ -365,11 +365,12 @@ class charging_stationEnv5(gym.Env):
         ox.plot_graph(G, node_color=node_color , node_size=30, figsize=(10, 8))
 n_ev=20
 env=charging_stationEnv5(G, charging_station_nodes , n_ev)
-
+avg_reward=[None]*n_ev
+avg_Q=[None]*n_ev
 action_space = env.action_space.n
-
+dqn = [Agent(args, env).to(device) for _ in range(20)]
 # Agent
-dqn = Agent(args, env)
+
 
 # If a model is provided, and evaluate is false, presumably we want to resume, so try to load memory
 if args.model is not None and not args.evaluate:
@@ -379,73 +380,80 @@ if args.model is not None and not args.evaluate:
     raise ValueError('Could not find memory file at {path}. Aborting...'.format(path=args.memory))
 
   mem = load_memory(args.memory, args.disable_bzip_memory)
-
+  mem = [load_memory(args.memory, args.disable_bzip_memory) for _ in range(20)]
 else:
   mem = ReplayMemory(args, args.memory_capacity)
-
+  mem = [ReplayMemory(args, args.memory_capacity) for _ in range(20)]
 priority_weight_increase = (1 - args.priority_weight) / (args.T_max - args.learn_start)
 
 
 # Construct validation memory
 val_mem = ReplayMemory(args, args.evaluation_size)
+val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
 T, done = 0, True
 while T < args.evaluation_size:
-  if done:
-    state , _ = env.reset()
-    state = torch.tensor(state, dtype=torch.float32, device='cpu')
-  next_state, _, done , _ , _ = env.step(np.random.randint(0, action_space))
-  next_state = torch.tensor(next_state, dtype=torch.float32, device='cpu')
-  val_mem.append(state, -1, 0.0, done)
-  state = next_state
-  T += 1
+  for i in range(n_ev):
+    env.j=i
+    if done:
+      state[i] , _ = env.reset()
+      state[i] = torch.tensor(state[i], dtype=torch.float32, device='cpu')
+    next_state[i], _, done[i] , _ , _ = env.step(np.random.randint(0, action_space))
+    next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
+    val_mem[i].append(state[i], -1, 0.0, done[i])
+    state[i] = next_state[i]
+    T += 1
 
 if args.evaluate:
-  dqn.eval()  # Set DQN (online network) to evaluation mode
-  avg_reward, avg_Q = test(args, 0, dqn, val_mem, metrics, results_dir, evaluate=True)  # Test
-  print('Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
+  for i in range(n_ev):
+    
+    dqn[i].eval()  # Set DQN (online network) to evaluation mode
+    avg_reward[i], avg_Q[i] = test(args, 0, dqn[i], val_mem[i], metrics, results_dir, evaluate=True)  # Test
+  print('Avg. reward: ' + str(np.men(avg_reward)) + ' | Avg. Q: ' + str(np.mean(avg_Q))
 else:
   # Training loop
-  dqn.train()
-  done = True
+  for i in range(n_ev):
+    dqn[i].train()
+    done[i] = True
   for T in trange(1, args.T_max + 1):
-    if done:
-      state , _ = env.reset()
-      state = torch.tensor(state, dtype=torch.float32, device='cpu')
-    if T % args.replay_frequency == 0:
-      dqn.reset_noise()  # Draw a new set of noisy weights
+    for i in range(n_ev):
+      if done[i]:
+        state[i] , _ = env.reset()
+        state[i] = torch.tensor(state[i], dtype=torch.float32, device='cpu')
+      if T % args.replay_frequency == 0:
+        dqn[i].reset_noise()  # Draw a new set of noisy weights
 
-    action = dqn.act(state)  # Choose an action greedily (with noisy weights)
-    next_state, reward, done , _ , _ = env.step(action)  # Step
-    next_state = torch.tensor(next_state, dtype=torch.float32, device='cpu')
-    if args.reward_clip > 0:
-      reward = max(min(reward, args.reward_clip), -args.reward_clip)  # Clip rewards
-    mem.append(state, action, reward, done)  # Append transition to memory
+        action[i] = dqn[i].act(state[i])  # Choose an action greedily (with noisy weights)
+      next_state[i], reward[i], done[i] , _ , _ = env.step(action[i])  # Step
+      next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
+      if args.reward_clip > 0:
+        reward[i] = max(min(reward[i], args.reward_clip), -args.reward_clip)  # Clip rewards
+      mem[i].append(state[i], action[i], reward[i], done[i])  # Append transition to memory
 
     # Train and test
-    if T >= args.learn_start:
-      mem.priority_weight = min(mem.priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
+      if T >= args.learn_start:
+        mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
 
       if T % args.replay_frequency == 0:
-        dqn.learn(mem)  # Train with n-step distributional double-Q learning
+        dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
 
       if T % args.evaluation_interval == 0:
-        dqn.eval()  # Set DQN (online network) to evaluation mode
-        avg_reward, avg_Q = test(args, T, dqn, val_mem, metrics, results_dir)  # Test
-        log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
-        dqn.train()  # Set DQN (online network) back to training mode
+        dqn[i].eval()  # Set DQN (online network) to evaluation mode
+        avg_reward[i], avg_Q[i] = test(args, T, dqn[i], val_mem[i], metrics, results_dir)  # Test
+        log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(np.mean(avg_reward)) + ' | Avg. Q: ' + str(np.mean(avg_Q)))
+        dqn[i].train()  # Set DQN (online network) back to training mode
 
         # If memory path provided, save it
         if args.memory is not None:
-          save_memory(mem, args.memory, args.disable_bzip_memory)
+          save_memory(mem[i], args.memory, args.disable_bzip_memory)
 
       # Update target network
       if T % args.target_update == 0:
-        dqn.update_target_net()
+        dqn[i].update_target_net()
 
       # Checkpoint the network
       if (args.checkpoint_interval != 0) and (T % args.checkpoint_interval == 0):
-        dqn.save(results_dir, 'checkpoint.pth')
+        dqn[i].save(results_dir, 'checkpoint.pth')
 
-    state = next_state
+    state[i] = next_state[i]
 
 env.close()
