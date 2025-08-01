@@ -468,9 +468,9 @@ else:
         log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
         dqn[i].train()  # Set DQN (online network) back to training mode
 
-      # If memory path provided, save it
-      if args.memory is not None:
-        save_memory(mem[i], args.memory, args.disable_bzip_memory)
+        # If memory path provided, save it
+        if args.memory is not None:
+          save_memory(mem[i], args.memory, args.disable_bzip_memory)
 
    # Update target network
    if T % args.target_update == 0:
