@@ -107,7 +107,10 @@ class charging_stationEnv5(gym.Env):
         self.desierd_soc=list(np.random.uniform(0.6, 0.8,n_ev ))
         self.current_soc=list(np.random.uniform(0.4, 0.6,n_ev ))
         self.current_node= random.sample(list(set(list(self.graph.nodes())) - set(self.charging_station_nodes)),n_ev )
-
+        self.desierd_soc=[0.66100103, 0.63790602, 0.75549051, 0.61561485, 0.729143  ,
+        0.69195903, 0.7593851 , 0.68783969, 0.7550384 , 0.73081715,
+        0.66198698, 0.7714709 , 0.68862069, 0.69329874, 0.79328139,
+        0.68420692, 0.60193999, 0.70433084, 0.6240742 , 0.61458114]
         self.current_soc=[0.51684445, 0.50067023, 0.53853516, 0.42557636, 0.46108417,
         0.44697881, 0.55068407, 0.43465217, 0.47451146, 0.5875858 ,
         0.5525329 , 0.43837829, 0.57131378, 0.47084906, 0.45499856,
