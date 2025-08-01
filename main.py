@@ -399,6 +399,7 @@ for i in range(n_ev):
   
   T, done[i] = 0, True
 while T < args.evaluation_size:
+
   for i in range(n_ev):
     env.j=i
     if done[i]:
@@ -422,6 +423,7 @@ else:
     dqn[i].train()
     done[i] = True
   for T in trange(1, args.T_max + 1):
+    print(T)
     for i in range(n_ev):
       env.j=i
       if done[i] == True:
