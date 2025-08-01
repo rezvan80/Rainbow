@@ -423,16 +423,19 @@ if args.evaluate:
 else:
   # Training loop
   for i in range(n_ev):
+    env.j=i
     dqn[i].train()
-    done[i] = True
+    done[i] = False
+    state[i] , _ = env.reset()
+    state[i] = torch.tensor(state[i] , dtype=torch.float32 , device='cpu')
   for T in trange(1, args.T_max + 1):
-    print(T)
+   while(all(done)==False): 
+    
     for i in range(n_ev):
-      env.j=i
-      if done[i] == True:
+     env.j=i
+     if done[i] == False:
         
-        state[i] , _ = env.reset()
-        state[i] = torch.tensor(state[i], dtype=torch.float32, device='cpu')
+
         
       if T % args.replay_frequency == 0:
         dqn[i].reset_noise()  # Draw a new set of noisy weights
@@ -448,14 +451,14 @@ else:
       if T >= args.learn_start:
         mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
 
-      if T % args.replay_frequency == 0:
-        dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
+        if T % args.replay_frequency == 0:
+          dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
 
-      if T % args.evaluation_interval == 0:
-        dqn[i].eval()  # Set DQN (online network) to evaluation mode
-        avg_reward[i], avg_Q[i] = test(args, T, dqn[i], val_mem[i], metrics, results_dir)  # Test
-        log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(np.mean(avg_reward)) + ' | Avg. Q: ' + str(np.mean(avg_Q)))
-        dqn[i].train()  # Set DQN (online network) back to training mode
+        if T % args.evaluation_interval == 0:
+          dqn[i].eval()  # Set DQN (online network) to evaluation mode
+          avg_reward[i], avg_Q[i] = test(args, T, dqn[i], val_mem[i], metrics, results_dir)  # Test
+          log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(np.mean(avg_reward)) + ' | Avg. Q: ' + str(np.mean(avg_Q)))
+          dqn[i].train()  # Set DQN (online network) back to training mode
 
         # If memory path provided, save it
         if args.memory is not None:
