@@ -303,7 +303,7 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
       state[i] , _ = env.reset()
       state[i] = torch.tensor(state[i] ,  dtype = torch.float32 , device = 'cpu')
     while (all(done) == False):
-      print(T)
+      
       for i in range(n_ev):
        env.j=i
        if done[i] == False:
