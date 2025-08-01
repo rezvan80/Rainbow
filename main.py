@@ -461,7 +461,7 @@ else:
 
         if T % args.replay_frequency == 0:
           dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
-       state[i] = next_state[i]
+      state[i] = next_state[i]
    if T % args.evaluation_interval == 0:
         dqn[i].eval()  # Set DQN (online network) to evaluation mode
         avg_reward[i], avg_Q[i] = test(args, T, dqn, val_mem, metrics, results_dir)  # Test
