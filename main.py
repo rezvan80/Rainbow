@@ -394,7 +394,9 @@ priority_weight_increase = (1 - args.priority_weight) / (args.T_max - args.learn
 # Construct validation memory
 val_mem = ReplayMemory(args, args.evaluation_size)
 val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
-T, done = 0, True
+for i in range(n_ev):
+  
+  T, done[i] = 0, True
 while T < args.evaluation_size:
   for i in range(n_ev):
     env.j=i
