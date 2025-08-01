@@ -434,6 +434,7 @@ else:
     dqn[i].train()
 
   for T in range(1, args.T_max + 1):
+   env.j=i
    done[i] = False
    state[i] , _ = env.reset()
    state[i] = torch.tensor(state[i] , dtype=torch.float32 , device='cpu')
@@ -468,13 +469,13 @@ else:
           log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
           dqn[i].train()  # Set DQN (online network) back to training mode
 
-        # If memory path provided, save it
-        if args.memory is not None:
-          save_memory(mem[i], args.memory, args.disable_bzip_memory)
+          # If memory path provided, save it
+          if args.memory is not None:
+            save_memory(mem[i], args.memory, args.disable_bzip_memory)
 
       # Update target network
       if T % args.target_update == 0:
-         dqn[i].update_target_net()
+           dqn[i].update_target_net()
 
       # Checkpoint the network
       if (args.checkpoint_interval != 0) and (T % args.checkpoint_interval == 0):
