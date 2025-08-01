@@ -425,10 +425,10 @@ else:
     for i in range(n_ev):
       env.j=i
       if done[i] == True:
-        print("4" , env.current_node[i])
+        
         state[i] , _ = env.reset()
         state[i] = torch.tensor(state[i], dtype=torch.float32, device='cpu')
-        print("14" , env.current_node[i])
+        
       if T % args.replay_frequency == 0:
         dqn[i].reset_noise()  # Draw a new set of noisy weights
 
