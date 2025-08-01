@@ -412,9 +412,10 @@ while T < args.evaluation_size:
  while(all(done) == False):
   for i in range(n_ev):
    env.j=i
+   
    if done[i]==False:
 
-    
+    print(T)
     next_state[i], _, done[i] , _ , _ = env.step(np.random.randint(0, action_space))
     next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
     val_mem[i].append(state[i], -1, 0.0, done[i])
