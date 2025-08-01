@@ -411,7 +411,7 @@ if args.evaluate:
   for i in range(n_ev):
     
     dqn[i].eval()  # Set DQN (online network) to evaluation mode
-    avg_reward[i], avg_Q[i] = test(args, 0, dqn[i], val_mem[i], metrics, results_dir, evaluate=True)  # Test
+  avg_reward, avg_Q = test(args, 0, dqn, val_mem, metrics, results_dir, evaluate=True)  # Test
   print('Avg. reward: ' + str(np.men(avg_reward)) + ' | Avg. Q: ' + str(np.mean(avg_Q))
 else:
   # Training loop
