@@ -277,7 +277,7 @@ class charging_stationEnv5(gym.Env):
         self.current_soc[self.j]=self.current_soc[self.j]-distance*0.0001
         self.charging_time[self.j]=(self.desierd_soc[self.j]-self.current_soc[self.j])/0.002
         self.iteration += 1
-        self.reward[self.j] = -distance
+        self.reward[self.j] = -0.01*distance
 
         self.distance[self.j]+=distance
         min_val = min(self.travel_times)
@@ -319,7 +319,7 @@ class charging_stationEnv5(gym.Env):
            #self.reward[self.j]=10
            self.station_ch[action].append((self.desierd_soc[self.j]-self.current_soc[self.j])/0.002)
            self.reward[self.j]= 100*np.exp(-0.01*np.sum(self.station_ch[action]))
-           self.reward[self.j]=100
+           #self.reward[self.j]=100
            #self.reward[self.j]=10
            self.average_distance.append(self.distance[self.j])
            self.node[self.current_node[self.j]]-=1
