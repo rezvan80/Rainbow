@@ -434,7 +434,7 @@ else:
     env.j=i
     dqn[i].train()
 
-  for T in range(1, args.T_max + 1):
+  for T in trange(1, args.T_max + 1):
    for i in range(n_ev):
      
     env.j=i
