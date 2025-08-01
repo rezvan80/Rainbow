@@ -466,24 +466,27 @@ else:
         if T % args.replay_frequency == 0:
           dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
       
-        if T % args.evaluation_interval == 0:
+      if T % args.evaluation_interval == 0:
+         for i in range(n_ev):
           dqn[i].eval()  # Set DQN (online network) to evaluation mode
-          avg_reward, avg_Q = test(args, T, dqn, val_mem, metrics, results_dir)  # Test
-          log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
+         avg_reward, avg_Q = test(args, T, dqn, val_mem, metrics, results_dir)  # Test
+         log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
+         for i in range(n_ev):
           dqn[i].train()  # Set DQN (online network) back to training mode
 
-          # If memory path provided, save it
-          if args.memory is not None:
-            save_memory(mem[i], args.memory, args.disable_bzip_memory)
-
-      # Update target network
-      if T % args.target_update == 0:
+         # If memory path provided, save it
+         if args.memory is not None:
+           save_memory(mem[i], args.memory, args.disable_bzip_memory)
+      state[i] = next_state[i]
+   # Update target network
+   if T % args.target_update == 0:
+        for i in range(n_ev):
            dqn[i].update_target_net()
 
-      # Checkpoint the network
-      if (args.checkpoint_interval != 0) and (T % args.checkpoint_interval == 0):
-         dqn[i].save(results_dir, 'checkpoint.pth')
+   # Checkpoint the network
+   if (args.checkpoint_interval != 0) and (T % args.checkpoint_interval == 0):
+        dqn[i].save(results_dir, 'checkpoint.pth')
 
-      state[i] = next_state[i]
+     
 
 
