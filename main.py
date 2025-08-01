@@ -367,6 +367,10 @@ n_ev=20
 env=charging_stationEnv5(G, charging_station_nodes , n_ev)
 avg_reward=[None]*n_ev
 avg_Q=[None]*n_ev
+state=[None]*n_ev
+done=[None]*n_ev
+next_state=[None]*n_ev
+reward=[None]*n_ev
 action_space = env.action_space.n
 dqn = [Agent(args, env).to(device) for _ in range(20)]
 # Agent
@@ -394,7 +398,7 @@ T, done = 0, True
 while T < args.evaluation_size:
   for i in range(n_ev):
     env.j=i
-    if done:
+    if done[i]:
       state[i] , _ = env.reset()
       state[i] = torch.tensor(state[i], dtype=torch.float32, device='cpu')
     next_state[i], _, done[i] , _ , _ = env.step(np.random.randint(0, action_space))
