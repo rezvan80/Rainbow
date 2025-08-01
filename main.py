@@ -423,8 +423,9 @@ else:
     done[i] = True
   for T in trange(1, args.T_max + 1):
     for i in range(n_ev):
+      print(env.current_node[i])
       if done[i]:
-        print(env.current_node)
+       
         state[i] , _ = env.reset()
         state[i] = torch.tensor(state[i], dtype=torch.float32, device='cpu')
       if T % args.replay_frequency == 0:
