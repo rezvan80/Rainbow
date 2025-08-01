@@ -420,7 +420,7 @@ while T < args.evaluation_size:
     next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
     val_mem[i].append(state[i], -1, 0.0, done[i])
     state[i] = next_state[i]
-    T += 1
+ T += 1
 
 if args.evaluate:
   for i in range(n_ev):
