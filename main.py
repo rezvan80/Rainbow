@@ -372,7 +372,7 @@ done=[None]*n_ev
 next_state=[None]*n_ev
 reward=[None]*n_ev
 action_space = env.action_space.n
-dqn = [Agent(args, env).to(device) for _ in range(20)]
+dqn = [Agent(args, env) for _ in range(20)]
 # Agent
 
 
