@@ -400,7 +400,7 @@ val_mem = ReplayMemory(args, args.evaluation_size)
 val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
 for i in range(n_ev):
   
-  T, done[i] = 0, True
+    T, done[i] = 0, True
 while T < args.evaluation_size:
 
   for i in range(n_ev):
@@ -457,7 +457,7 @@ else:
         if T % args.evaluation_interval == 0:
           dqn[i].eval()  # Set DQN (online network) to evaluation mode
           avg_reward[i], avg_Q[i] = test(args, T, dqn[i], val_mem[i], metrics, results_dir)  # Test
-          log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(np.mean(avg_reward)) + ' | Avg. Q: ' + str(np.mean(avg_Q)))
+          log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
           dqn[i].train()  # Set DQN (online network) back to training mode
 
         # If memory path provided, save it
