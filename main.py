@@ -431,7 +431,7 @@ else:
       if T % args.replay_frequency == 0:
         dqn[i].reset_noise()  # Draw a new set of noisy weights
 
-        action[i] = dqn[i].act(state[i])  # Choose an action greedily (with noisy weights)
+      action[i] = dqn[i].act(state[i])  # Choose an action greedily (with noisy weights)
       next_state[i], reward[i], done[i] , _ , _ = env.step(action[i])  # Step
       next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
       if args.reward_clip > 0:
