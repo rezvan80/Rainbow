@@ -319,7 +319,7 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
   if not evaluate:
       # Save model parameters if improved
       if avg_reward > metrics['best_avg_reward']:
-          metrics['best_avg_reward'] = avg_reward'
+          metrics['best_avg_reward'] = avg_reward
           for i in range(n_ev):
             dqn[i].save(results_dir)
 
