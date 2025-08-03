@@ -438,37 +438,33 @@ else:
     dqn[i].train()
 
   for T in trange(1, args.T_max + 1):
-   for i in range(n_ev):
+   
      
-    env.j=i
-    done[i] = False
+    
+    done = [False]*n_ev
     env.station_ch=list([[0] , [0] ,[0]])
-    state[i] , _ = env.reset()
-    state[i] = torch.tensor(state[i] , dtype=torch.float32 , device='cpu')
-   while(all(done)==False): 
+    state , _ = env.reset()
+    state = torch.tensor(state , dtype=torch.float32 , device='cpu')
+   while(all(done)==False):     
+      actions=[0]*n_ev
+      for i in range(n_ev):  
+        if T % args.replay_frequency == 0:
+          dqn[i].reset_noise()  # Draw a new set of noisy weights
 
-    for i in range(n_ev):
-     env.j=i
-     if done[i] == False:
-        
-
-        
-      if T % args.replay_frequency == 0:
-        dqn[i].reset_noise()  # Draw a new set of noisy weights
-
-      action[i] = dqn[i].act(state[i])  # Choose an action greedily (with noisy weights)
-      next_state[i], reward[i], done[i] , _ , _ = env.step(action[i])  # Step
-      next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
+          actions[i] = dqn[i].act(state[i])  # Choose an action greedily (with noisy weights)
+          
+      next_state, reward, done , _ , _ = env.step(actions)  # Step
+      next_state = torch.tensor(next_state, dtype=torch.float32, device='cpu')
       if args.reward_clip > 0:
-        reward[i] = max(min(reward[i], args.reward_clip), -args.reward_clip)  # Clip rewards
-      mem.append(state[i], action[i], reward[i], done[i])  # Append transition to memory
+        reward = max(min(reward, args.reward_clip), -args.reward_clip)  # Clip rewards
+      mem.append(state, actions, reward, done)  # Append transition to memory
 
       # Train and test
       if T >= args.learn_start:
         mem.priority_weight = min(mem.priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
-
-        if T % args.replay_frequency == 0:
-          dqn[i].learn(mem)  # Train with n-step distributional double-Q learning
+        for i in range(n_ev):
+          if T % args.replay_frequency == 0:
+            dqn[i].learn(mem)  # Train with n-step distributional double-Q learning
       
    if (T >= args.learn_start and T % args.evaluation_interval == 0):
       for i in range(n_ev):
@@ -481,7 +477,7 @@ else:
       # If memory path provided, save it
       if args.memory is not None:
         save_memory(mem, args.memory, args.disable_bzip_memory)
-      state[i] = next_state[i]
+      state = next_state
    # Update target network
    if (T>= args.learn_start and T % args.target_update == 0):
         for i in range(n_ev):
