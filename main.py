@@ -399,30 +399,20 @@ priority_weight_increase = (1 - args.priority_weight) / (args.T_max - args.learn
 # Construct validation memory
 val_mem = ReplayMemory(args, args.evaluation_size)
 #val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
-for i in range(n_ev):
-    env.j=i
-    T, done[i] = 0, False
-    env.station_ch=list([[0] , [0] ,[0]])
-    state[i] , _ = env.reset()
-    state[i] = torch.tensor(state[i] , dtype = torch.float32 , device = 'cpu')
-while T < args.evaluation_size:
- for i in range(n_ev):
-   env.j=i
-   done[i] = False
-   env.station_ch=list([[0] , [0] ,[0]])
-   state[i] , _ = env.reset()
-   state[i] = torch.tensor(state[i] , dtype = torch.float32 , device = 'cpu')
- while(all(done) == False):
-  for i in range(n_ev):
-   env.j=i
-   
-   if done[i]==False:
 
-    
-    next_state[i], _, done[i] , _ , _ = env.step(np.random.randint(0, action_space))
-    next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
-    val_mem.append(state[i], -1, 0.0, done[i])
-    state[i] = next_state[i]
+while T < args.evaluation_size:
+ 
+ 
+ done = [False]*n_ev
+ env.station_ch=list([[0] , [0] ,[0]])
+ state , _ = env.reset()
+ state = torch.tensor(state , dtype = torch.float32 , device = 'cpu')
+ while(all(done) == False):
+
+    next_state, _, done , _ , _ = env.step(np.random.randint(0, action_space))
+    next_state = torch.tensor(next_state, dtype=torch.float32, device='cpu')
+    val_mem.append(state, -1, 0.0, done)
+    state = next_state
  T += 1
 print(T)
 if args.evaluate:
