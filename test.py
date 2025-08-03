@@ -293,6 +293,7 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
   # Test performance over several episodes
     done[i] = True
     reward_sum[i] ,done[i] = 0 , False
+    env.station_ch=list([[0] , [0] ,[0]])
     state[i] , _ = env.reset()
     state[i] = torch.tensor(state[i] ,  dtype = torch.float32 , device = 'cpu')
   for T in range(args.evaluation_episodes):
@@ -300,6 +301,7 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
       env.j=i
       done[i] = True
       reward_sum[i] ,done[i] = 0 , False
+      env.station_ch=list([[0] , [0] ,[0]])
       state[i] , _ = env.reset()
       state[i] = torch.tensor(state[i] ,  dtype = torch.float32 , device = 'cpu')
     while (all(done) == False):
