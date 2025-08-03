@@ -321,8 +321,8 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
         
 
        # Test Q-values over validation memory
-       for state[i] in val_mem[i]:  # Iterate over valid states
-         T_Qs.append(dqn[i].evaluate_q(state[i]))
+       for sta in val_mem:  # Iterate over valid states
+         T_Qs.append(dqn[i].evaluate_q(sta))
 
   avg_reward, avg_Q = sum(T_rewards) / len(T_rewards), sum(T_Qs) / len(T_Qs)
   if not evaluate:
@@ -338,8 +338,8 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
           torch.save(metrics, os.path.join(results_dir, 'metrics.pth'))
  
           # Plot
-          _plot_line(metrics['steps'], metrics['rewards'], 'Reward', path=results_dir)
-          _plot_line(metrics['steps'], metrics['Qs'], 'Q', path=results_dir)
+          #_plot_line(metrics['steps'], metrics['rewards'], 'Reward', path=results_dir)
+          #_plot_line(metrics['steps'], metrics['Qs'], 'Q', path=results_dir)
 
   # Return average reward and Q-value
   return avg_reward, avg_Q
