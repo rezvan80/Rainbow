@@ -401,12 +401,14 @@ val_mem = ReplayMemory(args, args.evaluation_size)
 for i in range(n_ev):
     env.j=i
     T, done[i] = 0, False
+    env.station_ch=list([[0] , [0] ,[0]])
     state[i] , _ = env.reset()
     state[i] = torch.tensor(state[i] , dtype = torch.float32 , device = 'cpu')
 while T < args.evaluation_size:
  for i in range(n_ev):
    env.j=i
    done[i] = False
+   env.station_ch=list([[0] , [0] ,[0]])
    state[i] , _ = env.reset()
    state[i] = torch.tensor(state[i] , dtype = torch.float32 , device = 'cpu')
  while(all(done) == False):
@@ -439,6 +441,7 @@ else:
      
     env.j=i
     done[i] = False
+    env.station_ch=list([[0] , [0] ,[0]])
     state[i] , _ = env.reset()
     state[i] = torch.tensor(state[i] , dtype=torch.float32 , device='cpu')
    while(all(done)==False): 
