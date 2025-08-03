@@ -388,16 +388,16 @@ if args.model is not None and not args.evaluate:
     raise ValueError('Could not find memory file at {path}. Aborting...'.format(path=args.memory))
 
   mem = load_memory(args.memory, args.disable_bzip_memory)
-  mem = [load_memory(args.memory, args.disable_bzip_memory) for _ in range(20)]
+  #mem = [load_memory(args.memory, args.disable_bzip_memory) for _ in range(20)]
 else:
   mem = ReplayMemory(args, args.memory_capacity)
-  mem = [ReplayMemory(args, args.memory_capacity) for _ in range(20)]
+  #mem = [ReplayMemory(args, args.memory_capacity) for _ in range(20)]
 priority_weight_increase = (1 - args.priority_weight) / (args.T_max - args.learn_start)
 
 
 # Construct validation memory
 val_mem = ReplayMemory(args, args.evaluation_size)
-val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
+#val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
 for i in range(n_ev):
     env.j=i
     T, done[i] = 0, False
@@ -418,7 +418,7 @@ while T < args.evaluation_size:
     
     next_state[i], _, done[i] , _ , _ = env.step(np.random.randint(0, action_space))
     next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
-    val_mem[i].append(state[i], -1, 0.0, done[i])
+    val_mem.append(state[i], -1, 0.0, done[i])
     state[i] = next_state[i]
  T += 1
 print(T)
@@ -457,14 +457,14 @@ else:
       next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
       if args.reward_clip > 0:
         reward[i] = max(min(reward[i], args.reward_clip), -args.reward_clip)  # Clip rewards
-      mem[i].append(state[i], action[i], reward[i], done[i])  # Append transition to memory
+      mem.append(state[i], action[i], reward[i], done[i])  # Append transition to memory
 
       # Train and test
       if T >= args.learn_start:
-        mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
+        mem.priority_weight = min(mem.priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
 
         if T % args.replay_frequency == 0:
-          dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
+          dqn[i].learn(mem)  # Train with n-step distributional double-Q learning
       
    if (T >= args.learn_start and T % args.evaluation_interval == 0):
       for i in range(n_ev):
@@ -476,7 +476,7 @@ else:
 
       # If memory path provided, save it
       if args.memory is not None:
-        save_memory(mem[i], args.memory, args.disable_bzip_memory)
+        save_memory(mem, args.memory, args.disable_bzip_memory)
       state[i] = next_state[i]
    # Update target network
    if (T>= args.learn_start and T % args.target_update == 0):
