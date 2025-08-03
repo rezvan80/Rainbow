@@ -144,34 +144,35 @@ class charging_stationEnv5(gym.Env):
         super().reset(seed=seed)
         self.distance[self.j]=0
         """ Reset the environment to the initial state (start node). """
-        self.current_soc[self.j]=[0.51684445, 0.50067023, 0.53853516, 0.42557636, 0.46108417,
+        self.current_soc=[0.51684445, 0.50067023, 0.53853516, 0.42557636, 0.46108417,
         0.44697881, 0.55068407, 0.43465217, 0.47451146, 0.5875858 ,
         0.5525329 , 0.43837829, 0.57131378, 0.47084906, 0.45499856,
-        0.54569187, 0.53936948, 0.52403585, 0.47374796, 0.59744536][self.j]
-        self.current_node[self.j]=[7, 38, 33, 21, 0, 20, 25, 2, 12, 45, 11, 48, 15, 49, 40, 44, 52, 18, 27, 28][self.j]
+        0.54569187, 0.53936948, 0.52403585, 0.47374796, 0.59744536]
+        self.current_node=[7, 38, 33, 21, 0, 20, 25, 2, 12, 45, 11, 48, 15, 49, 40, 44, 52, 18, 27, 28]
         #self.desierd_soc[self.j]=list(np.random.uniform(0.6, 0.8,1 ))[0]
         #self.current_soc[self.j]=list(np.random.uniform(0.4, 0.6,1 ))[0]
         #self.current_node[self.j]= random.sample(list(set(list(self.graph.nodes())) - set(self.charging_station_nodes)),1 )[0]
 
         #self.path = [self.start_node]  # Reset path tracker
-        self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1)) ,axis=0)
-        #self.state[self.j]=np.array(charging_time(self.station_arr , self.charging_time))
+        for i in range(n_ev):
+          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1)) ,axis=0)
+          #self.state[self.j]=np.array(charging_time(self.station_arr , self.charging_time))
 
-        self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) ,np.array([self.desierd_soc[self.j]-self.current_soc[self.j]]), np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
-        #self.state[self.j]=model.wv[str(self.current_node[self.j])]
-        self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])],np.array([self.current_soc[self.j]-self.desierd_soc[self.j]]) , np.array(self.node))  , axis=0)
-        #
-        #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])] ) , axis=0))
-        #self.state[self.j]=np.array(self.fcc[self.j])
-        #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) , axis=0)
-        self.distance[self.j]=0
-        return self.state[self.j] , {}
+          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) ,np.array([self.desierd_soc[i]-self.current_soc[i]]), np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
+          #self.state[self.j]=model.wv[str(self.current_node[self.j])]
+          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.current_soc[i]-self.desierd_soc[i]]) , np.array(self.node))  , axis=0)
+          #
+          #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])] ) , axis=0))
+          #self.state[self.j]=np.array(self.fcc[self.j])
+          #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) , axis=0)
+          self.distance[i]=0
+        return self.state , {}
 
     def step(self , action ):
 
-
-        self.done[self.j] = False
-        shortest_path = nx.shortest_path(self.graph, source=self.current_node[self.j], target=self.charging_station_nodes[action], weight="length")
+      for i in range(n_ev):
+        
+        shortest_path = nx.shortest_path(self.graph, source=self.current_node[self.j], target=self.charging_station_nodes[action[i]], weight="length")
         """ Take a step in the environment with the given action. """
 
         self.station_arr[int(action)][int(self.j)]= nx.shortest_path_length(G, source=self.current_node[self.j], target=self.charging_station_nodes[action], weight="length")
@@ -183,20 +184,20 @@ class charging_stationEnv5(gym.Env):
                     self.station_arr[row_idx][self.j] = None
 
         distance=self.graph.get_edge_data(shortest_path[0] , shortest_path[1])[0]['length']
-        self.travel_times[self.j] =distance
-        self.current_soc[self.j]=self.current_soc[self.j]-distance*0.0001
-        self.charging_time[self.j]=(self.desierd_soc[self.j]-self.current_soc[self.j])/0.002
+        self.travel_times[i] =distance
+        self.current_soc[i]=self.current_soc[i]-distance*0.0001
+        self.charging_time[i]=(self.desierd_soc[i]-self.current_soc[i])/0.002
         self.iteration += 1
-        self.reward[self.j] = 0
+        self.reward[i] = 0
 
-        self.distance[self.j]+=distance
+        self.distance[i]+=distance
         min_val = min(self.travel_times)
         self.station_ch=subtract_from_list(self.station_ch,min(self.travel_times)/10)
-        self.label[self.j].extend(model.wv[str(self.current_node[self.j])])
-        if self.node[self.current_node[self.j]] > 0:
-           self.node[self.current_node[self.j]] -=1
-        self.current_node[self.j] = shortest_path[1]
-        self.node[self.current_node[self.j]] +=1
+        self.label[i].extend(model.wv[str(self.current_node[i])])
+        if self.node[self.current_node[i]] > 0:
+           self.node[self.current_node[i]] -=1
+        self.current_node[i] = shortest_path[1]
+        self.node[self.current_node[i]] +=1
         #reward=1
         #done = self.current_node == self.goal_node
         # Plot the graph and the shortest path
@@ -222,19 +223,19 @@ class charging_stationEnv5(gym.Env):
               #reward=-np.sum(fcc_encoder(self.station_arr , self.charging_time , self.arrival_time))
 
         #if self.current_node[self.j] in self.charging_station_nodes:
-
-        if self.current_node[self.j] in self.charging_station_nodes:
-           self.average_reward.append(np.sum(self.station_ch[action]))
-           ch=(self.desierd_soc[self.j]-self.current_soc[self.j])/0.001
+      for i in range(n_ev):
+        if self.current_node[i] in self.charging_station_nodes:
+           self.average_reward.append(np.sum(self.station_ch[action[i]]))
+           ch=(self.desierd_soc[i]-self.current_soc[i])/0.001
            #self.reward[self.j]=10
-           self.station_ch[action].append((self.desierd_soc[self.j]-self.current_soc[self.j])/0.002)
-           self.reward[self.j]= 100*np.exp(-0.01*np.sum(self.station_ch[action]))
+           self.station_ch[action[i]].append((self.desierd_soc[i]-self.current_soc[i])/0.002)
+           self.reward[i]= 100*np.exp(-0.01*np.sum(self.station_ch[action[i]]))
 
            #self.reward[self.j]=10
-           self.average_distance.append(self.distance[self.j])
-           self.node[self.current_node[self.j]]-=1
+           self.average_distance.append(self.distance[i])
+           self.node[self.current_node[i]]-=1
 
-           self.done[self.j] = True
+           self.done[i] = True
            #action  = self.charging_station_nodes.index(self.current_node[self.j])  # Large reward for reaching the goal
 
         #self.reward[self.j]=100/(1+np.sum(self.station_ch[action]))
@@ -242,15 +243,15 @@ class charging_stationEnv5(gym.Env):
         #self.reward[self.j]=-np.sum(charging_time(self.station_arr , self.charging_time ))/100
 
 
-        self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) , np.array([self.desierd_soc[self.j]-self.current_soc[self.j]]) , np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
+        self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) , np.array([self.desierd_soc[i]-self.current_soc[i]]) , np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
         #self.state[self.j]=model.wv[str(self.current_node[self.j])]
         #self.state[self.j]=np.array(charging_time(self.station_arr , self.charging_time))
-        self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])],np.array([self.desierd_soc[self.j]-self.current_soc[self.j]]) , np.array(self.node)) , axis=0)
+        self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.desierd_soc[i]-self.current_soc[i]]) , np.array(self.node)) , axis=0)
 
         #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])],np.array([self.current_soc[self.j]]),np.array([self.desierd_soc[self.j]])) , axis=0))
         #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) ,axis=0)
 
-        return self.state[self.j] ,self.reward[self.j] ,self.done[self.j] ,  self.done[self.j] , {}
+        return self.state ,self.reward ,self.done ,  self.done , {}
 
 
     def plot_path(self):
