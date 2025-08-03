@@ -289,43 +289,38 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
   reward_sum=[None]*n_ev
   metrics['steps'].append(T)
   T_rewards, T_Qs = [], []
-  for i in range(n_ev):
-    env.j=i
+
   # Test performance over several episodes
-    done[i] = True
-    reward_sum[i] ,done[i] = 0 , False
-    env.station_ch=list([[0] , [0] ,[0]])
-    state[i] , _ = env.reset()
-    state[i] = torch.tensor(state[i] ,  dtype = torch.float32 , device = 'cpu')
+  done[i] = True
+  reward_sum[i] ,done[i] = 0 , False
+  env.station_ch=list([[0] , [0] ,[0]])
+  state , _ = env.reset()
+  state = torch.tensor(state ,  dtype = torch.float32 , device = 'cpu')
   for T in range(args.evaluation_episodes):
-    for i in range(n_ev):
-      env.j=i
-      done[i] = True
-      reward_sum[i] ,done[i] = 0 , False
-      env.station_ch=list([[0] , [0] ,[0]])
-      state[i] , _ = env.reset()
-      state[i] = torch.tensor(state[i] ,  dtype = torch.float32 , device = 'cpu')
+
+    reward_sum[i] ,done[i] = [0]*n_ev , [False]*n_ev
+    env.station_ch=list([[0] , [0] ,[0]])
+    state , _ = env.reset()
+    state = torch.tensor(state ,  dtype = torch.float32 , device = 'cpu')
     while (all(done) == False):
       
-      for i in range(n_ev):
-       env.j=i
-       if done[i] == False:
-        
-        action[i] = dqn[i].act_e_greedy(state[i])  # Choose an action ε-greedily
-        state[i], reward[i], done[i] , _ , _ = env.step(action[i])  # Step
-        state[i] = torch.tensor(state[i], dtype=torch.float32, device='cpu')
-        reward_sum[i] += reward[i]
+        for i in range(n_ev):
+          action[i] = dqn[i].act_e_greedy(state[i])  # Choose an action ε-greedily
+        state, reward, done , _ , _ = env.step(action)  # Step
+        state = torch.tensor(state, dtype=torch.float32, device='cpu')
+        reward_sum += reward
         if args.render:
           env.render()
 
         
-       T_rewards.append(reward_sum[i])
+       T_rewards.append(sum(reward_sum))
           
         
 
        # Test Q-values over validation memory
        for sta in val_mem:  # Iterate over valid states
-         T_Qs.append(dqn[i].evaluate_q(sta))
+         for i in range(n_ev):
+           T_Qs.append(dqn[i].evaluate_q(sta[i]))
 
   avg_reward, avg_Q = sum(T_rewards) / len(T_rewards), sum(T_Qs) / len(T_Qs)
   if not evaluate:
