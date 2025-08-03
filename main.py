@@ -304,7 +304,7 @@ class charging_stationEnv5(gym.Env):
 
         self.arrival_time = np.array([
               nx.shortest_path_length(
-                    G, source=self.current_node[self.j], target=charging_station, weight="length"
+                    G, source=self.current_node[i], target=charging_station, weight="length"
                 )
                 for charging_station in self.charging_station_nodes
             ])
