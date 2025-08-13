@@ -126,12 +126,12 @@ class charging_stationEnv5(gym.Env):
         self.test=False
         self.iteration= 0
         self.reward=[0]*n_ev
-        self.state=[[0]*70]*n_ev
+        self.state=[[0]*17]*n_ev
         self.done=[False]*n_ev
         self.average_reward=[0]
         # Define action and observation spaces
         self.action_space =spaces.Discrete(3)  # One action per node
-        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(70,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(17,), dtype=np.float32)
         self.travel_times=[0]*n_ev
         self.action=[0]*n_ev
 
@@ -154,13 +154,13 @@ class charging_stationEnv5(gym.Env):
         #self.current_node[self.j]= random.sample(list(set(list(self.graph.nodes())) - set(self.charging_station_nodes)),1 )[0]
 
         #self.path = [self.start_node]  # Reset path tracker
-        for i in range(n_ev):
-          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1)) ,axis=0)
+        for i in range(20):
+          #self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1)) ,axis=0)
           #self.state[self.j]=np.array(charging_time(self.station_arr , self.charging_time))
 
-          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) ,np.array([self.desierd_soc[i]-self.current_soc[i]]), np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
+          #self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) ,np.array([self.desierd_soc[i]-self.current_soc[i]]), np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
           #self.state[self.j]=model.wv[str(self.current_node[self.j])]
-          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.current_soc[i]-self.desierd_soc[i]]) , np.array(self.node))  , axis=0)
+          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.current_soc[i]-self.desierd_soc[i]]) )  , axis=0)
           #
           #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])] ) , axis=0))
           #self.state[self.j]=np.array(self.fcc[self.j])
@@ -170,8 +170,8 @@ class charging_stationEnv5(gym.Env):
 
     def step(self , action ):
 
-      for i in range(n_ev):
-        
+      for i in range(20):
+       if self.done[i] == False :
         shortest_path = nx.shortest_path(self.graph, source=self.current_node[i], target=self.charging_station_nodes[action[i]], weight="length")
         """ Take a step in the environment with the given action. """
 
@@ -223,7 +223,8 @@ class charging_stationEnv5(gym.Env):
               #reward=-np.sum(fcc_encoder(self.station_arr , self.charging_time , self.arrival_time))
 
         #if self.current_node[self.j] in self.charging_station_nodes:
-      for i in range(n_ev):
+      for i in range(20):
+       if self.done[i] == False:
         if self.current_node[i] in self.charging_station_nodes:
            self.average_reward.append(np.sum(self.station_ch[action[i]]))
            ch=(self.desierd_soc[i]-self.current_soc[i])/0.001
@@ -243,10 +244,10 @@ class charging_stationEnv5(gym.Env):
         #self.reward[self.j]=-np.sum(charging_time(self.station_arr , self.charging_time ))/100
 
 
-        self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) , np.array([self.desierd_soc[i]-self.current_soc[i]]) , np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
+        #self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) , np.array([self.desierd_soc[i]-self.current_soc[i]]) , np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
         #self.state[self.j]=model.wv[str(self.current_node[self.j])]
         #self.state[self.j]=np.array(charging_time(self.station_arr , self.charging_time))
-        self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.desierd_soc[i]-self.current_soc[i]]) , np.array(self.node)) , axis=0)
+        self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.desierd_soc[i]-self.current_soc[i]])) , axis=0)
 
         #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])],np.array([self.current_soc[self.j]]),np.array([self.desierd_soc[self.j]])) , axis=0))
         #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) ,axis=0)
@@ -291,24 +292,28 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
   T_rewards, T_Qs = [], []
 
   # Test performance over several episodes
-  done[i] = True
-  reward_sum[i] ,done[i] = 0 , False
+  
+  reward_sum ,done = [0]*n_ev , [False]*n_ev
+  env.done = [False]*n_ev
   env.station_ch=list([[0] , [0] ,[0]])
   state , _ = env.reset()
   state = torch.tensor(state ,  dtype = torch.float32 , device = 'cpu')
   for T in range(args.evaluation_episodes):
-
-    reward_sum[i] ,done[i] = [0]*n_ev , [False]*n_ev
+    
+    reward_sum ,done = [0]*n_ev , [False]*n_ev
+    env.done = [False]*n_ev
     env.station_ch=list([[0] , [0] ,[0]])
     state , _ = env.reset()
     state = torch.tensor(state ,  dtype = torch.float32 , device = 'cpu')
     while (all(done) == False):
-      
-        for i in range(n_ev):
+        env.reward = [0]*n_ev
+        for i in range(20):
           action[i] = dqn[i].act_e_greedy(state[i])  # Choose an action ε-greedily
+        
         state, reward, done , _ , _ = env.step(action)  # Step
         state = torch.tensor(state, dtype=torch.float32, device='cpu')
         reward_sum += reward
+        
         if args.render:
           env.render()
 
@@ -318,10 +323,24 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
         
 
     # Test Q-values over validation memory
-    for sta in val_mem:  # Iterate over valid states
-      for i in range(n_ev):
-        T_Qs.append(dqn[i].evaluate_q(sta[i]))
+    # Iterate over valid states
+    for i in range(n_ev):
+      for sta in val_mem[i]:
+        
+        T_Qs.append(dqn[i].evaluate_q(sta))
+    import copy
+    params_list = [ppo.online_net.state_dict() for ppo in dqn]
 
+    # Start with one agent's weights as base
+    avg_params = copy.deepcopy(params_list[0])
+
+    for key in avg_params.keys():
+      for i in range(1, len(params_list)):
+                avg_params[key] += params_list[i][key]
+      avg_params[key] /= len(params_list)
+    for i in range(20) :
+          dqn[i].online_net.load_state_dict(avg_params)
+          dqn[i].target_net.load_state_dict(avg_params)  
   avg_reward, avg_Q = sum(T_rewards) / len(T_rewards), sum(T_Qs) / len(T_Qs)
   if not evaluate:
       # Save model parameters if improved
