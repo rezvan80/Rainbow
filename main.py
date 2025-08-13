@@ -262,17 +262,17 @@ class charging_stationEnv5(gym.Env):
     def step(self , action ):
 
       for i in range(n_ev):
-        
-        shortest_path = nx.shortest_path(self.graph, source=self.current_node[self.j], target=self.charging_station_nodes[action[i]], weight="length")
+       if self.done[i] == False:
+        shortest_path = nx.shortest_path(self.graph, source=self.current_node[i], target=self.charging_station_nodes[action[i]], weight="length")
         """ Take a step in the environment with the given action. """
 
-        self.station_arr[int(action)][int(self.j)]= nx.shortest_path_length(G, source=self.current_node[self.j], target=self.charging_station_nodes[action], weight="length")
+        self.station_arr[int(action[i])][int(i)]= nx.shortest_path_length(G, source=self.current_node[i], target=self.charging_station_nodes[action[i]], weight="length")
 
         for row_idx in range(len(self.station_arr)):
 
-               if row_idx != int(action):
+               if row_idx != int(action[i]):
 
-                    self.station_arr[row_idx][self.j] = None
+                    self.station_arr[row_idx][i] = None
 
         distance=self.graph.get_edge_data(shortest_path[0] , shortest_path[1])[0]['length']
         self.travel_times[i] =distance
@@ -315,6 +315,7 @@ class charging_stationEnv5(gym.Env):
 
         #if self.current_node[self.j] in self.charging_station_nodes:
       for i in range(n_ev):
+       if self.done[i] == False:
         if self.current_node[i] in self.charging_station_nodes:
            self.average_reward.append(np.sum(self.station_ch[action[i]]))
            ch=(self.desierd_soc[i]-self.current_soc[i])/0.001
@@ -342,7 +343,7 @@ class charging_stationEnv5(gym.Env):
         #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])],np.array([self.current_soc[self.j]]),np.array([self.desierd_soc[self.j]])) , axis=0))
         #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) ,axis=0)
 
-        return self.state ,self.reward ,self.done ,  self.done , {}
+      return self.state ,self.reward ,self.done ,  self.done , {}
 
     def plot_path(self):
         """Visualizes the graph and highlights the visited path using ox.plot_graph."""
@@ -389,29 +390,31 @@ if args.model is not None and not args.evaluate:
     raise ValueError('Could not find memory file at {path}. Aborting...'.format(path=args.memory))
 
   mem = load_memory(args.memory, args.disable_bzip_memory)
-  #mem = [load_memory(args.memory, args.disable_bzip_memory) for _ in range(20)]
+  mem = [load_memory(args.memory, args.disable_bzip_memory) for _ in range(20)]
 else:
   mem = ReplayMemory(args, args.memory_capacity)
-  #mem = [ReplayMemory(args, args.memory_capacity) for _ in range(20)]
+  mem = [ReplayMemory(args, args.memory_capacity) for _ in range(20)]
 priority_weight_increase = (1 - args.priority_weight) / (args.T_max - args.learn_start)
 
 
 # Construct validation memory
 val_mem = ReplayMemory(args, args.evaluation_size)
-#val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
-
+val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
+T=0
 while T < args.evaluation_size:
  
  
  done = [False]*n_ev
+ env.done = [False]*n_ev
  env.station_ch=list([[0] , [0] ,[0]])
  state , _ = env.reset()
  state = torch.tensor(state , dtype = torch.float32 , device = 'cpu')
  while(all(done) == False):
 
-    next_state, _, done , _ , _ = env.step(np.random.randint(0, action_space))
+    next_state, _, done , _ , _ = env.step(np.random.randint(0, action_space , 20))
     next_state = torch.tensor(next_state, dtype=torch.float32, device='cpu')
-    val_mem.append(state, -1, 0.0, done)
+    for i in range(20):
+      val_mem[i].append(state[i], -1, 0.0, done[i])
     state = next_state
  T += 1
 print(T)
@@ -431,10 +434,10 @@ else:
    
      
     
-    done = [False]*n_ev
-    env.station_ch=list([[0] , [0] ,[0]])
-    state , _ = env.reset()
-    state = torch.tensor(state , dtype=torch.float32 , device='cpu')
+   done = [False]*n_ev
+   env.station_ch=list([[0] , [0] ,[0]])
+   state , _ = env.reset()
+   state = torch.tensor(state , dtype=torch.float32 , device='cpu')
    while(all(done)==False):     
       actions=[0]*n_ev
       for i in range(n_ev):  
@@ -446,27 +449,28 @@ else:
       next_state, reward, done , _ , _ = env.step(actions)  # Step
       next_state = torch.tensor(next_state, dtype=torch.float32, device='cpu')
       if args.reward_clip > 0:
-        reward = max(min(reward, args.reward_clip), -args.reward_clip)  # Clip rewards
-      mem.append(state, actions, reward, done)  # Append transition to memory
+        reward = np.clip(reward, args.reward_clip, -args.reward_clip)  # Clip rewards
+      mem[i].append(state[i], actions[i], reward[i], done[i])  # Append transition to memory
 
       # Train and test
       if T >= args.learn_start:
-        mem.priority_weight = min(mem.priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
+        mem[i].priority_weight = min(mem.priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
         for i in range(n_ev):
           if T % args.replay_frequency == 0:
-            dqn[i].learn(mem)  # Train with n-step distributional double-Q learning
+            dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
       
    if (T >= args.learn_start and T % args.evaluation_interval == 0):
       for i in range(n_ev):
         dqn[i].eval()  # Set DQN (online network) to evaluation mode
-      avg_reward, avg_Q = test(args, T, dqn, val_mem, metrics, results_dir)  # Test
+      avg_reward, avg_Q = test(args, T, dqn, val_mem[i], metrics, results_dir)  # Test
       log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q))
       for i in range(n_ev):
         dqn[i].train()  # Set DQN (online network) back to training mode
 
       # If memory path provided, save it
       if args.memory is not None:
-        save_memory(mem, args.memory, args.disable_bzip_memory)
+       for i in range(20):
+        save_memory(mem[i], args.memory, args.disable_bzip_memory)
       state = next_state
    # Update target network
    if (T>= args.learn_start and T % args.target_update == 0):
@@ -478,5 +482,6 @@ else:
         dqn[i].save(results_dir, 'checkpoint.pth')
 
      
+
 
 
