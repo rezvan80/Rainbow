@@ -172,16 +172,16 @@ class charging_stationEnv5(gym.Env):
 
       for i in range(n_ev):
         
-        shortest_path = nx.shortest_path(self.graph, source=self.current_node[self.j], target=self.charging_station_nodes[action[i]], weight="length")
+        shortest_path = nx.shortest_path(self.graph, source=self.current_node[i], target=self.charging_station_nodes[action[i]], weight="length")
         """ Take a step in the environment with the given action. """
 
-        self.station_arr[int(action)][int(self.j)]= nx.shortest_path_length(G, source=self.current_node[self.j], target=self.charging_station_nodes[action], weight="length")
+        self.station_arr[int(action[i])][int(i)]= nx.shortest_path_length(G, source=self.current_node[i], target=self.charging_station_nodes[action[i]], weight="length")
 
         for row_idx in range(len(self.station_arr)):
 
-               if row_idx != int(action):
+               if row_idx != int(action[i]):
 
-                    self.station_arr[row_idx][self.j] = None
+                    self.station_arr[row_idx][i] = None
 
         distance=self.graph.get_edge_data(shortest_path[0] , shortest_path[1])[0]['length']
         self.travel_times[i] =distance
@@ -251,7 +251,7 @@ class charging_stationEnv5(gym.Env):
         #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])],np.array([self.current_soc[self.j]]),np.array([self.desierd_soc[self.j]])) , axis=0))
         #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) ,axis=0)
 
-        return self.state ,self.reward ,self.done ,  self.done , {}
+      return self.state ,self.reward ,self.done ,  self.done , {}
 
 
     def plot_path(self):
@@ -313,14 +313,14 @@ def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
           env.render()
 
         
-       T_rewards.append(sum(reward_sum))
+    T_rewards.append(sum(reward_sum))
           
         
 
-       # Test Q-values over validation memory
-       for sta in val_mem:  # Iterate over valid states
-         for i in range(n_ev):
-           T_Qs.append(dqn[i].evaluate_q(sta[i]))
+    # Test Q-values over validation memory
+    for sta in val_mem:  # Iterate over valid states
+      for i in range(n_ev):
+        T_Qs.append(dqn[i].evaluate_q(sta[i]))
 
   avg_reward, avg_Q = sum(T_rewards) / len(T_rewards), sum(T_Qs) / len(T_Qs)
   if not evaluate:
