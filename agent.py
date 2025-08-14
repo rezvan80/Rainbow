@@ -12,7 +12,7 @@ from model import DQN
 class Agent():
   def __init__(self, args, env):
     self.action_space = env.action_space.n
-    self.obs_dim=env.state_space.shape[0]
+    self.obs_dim=env.observation_space.shape[0]
     self.atoms = args.atoms
     self.Vmin = args.V_min
     self.Vmax = args.V_max
