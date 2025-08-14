@@ -117,8 +117,5 @@ class Agent():
   def eval(self):
     self.online_net.eval()
 
-   # Checkpoint the network
-   if (args.checkpoint_interval != 0) and (T % args.checkpoint_interval == 0):
-        dqn[i].save(results_dir, 'checkpoint.pth')
 
   
