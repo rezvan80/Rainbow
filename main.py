@@ -450,11 +450,13 @@ else:
       next_state = torch.tensor(next_state, dtype=torch.float32, device='cpu')
       if args.reward_clip > 0:
         reward = np.clip(reward, args.reward_clip, -args.reward_clip)  # Clip rewards
-      mem[i].append(state[i], actions[i], reward[i], done[i])  # Append transition to memory
+      for i in range(20):
+        mem[i].append(state[i], actions[i], reward[i], done[i])  # Append transition to memory
 
    # Train and test
    if T >= args.learn_start:
-      mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
+      for i in range(20):
+        mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
       for i in range(n_ev):
         if T % args.replay_frequency == 0:
           dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
