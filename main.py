@@ -279,7 +279,7 @@ class charging_stationEnv5(gym.Env):
         self.current_soc[i]=self.current_soc[i]-distance*0.0001
         self.charging_time[i]=(self.desierd_soc[i]-self.current_soc[i])/0.002
         self.iteration += 1
-        self.reward[i] = 0
+        self.reward[i] = -0.01*distance
 
         self.distance[i]+=distance
         min_val = min(self.travel_times)
@@ -321,7 +321,7 @@ class charging_stationEnv5(gym.Env):
            ch=(self.desierd_soc[i]-self.current_soc[i])/0.001
            #self.reward[self.j]=10
            self.station_ch[action[i]].append((self.desierd_soc[i]-self.current_soc[i])/0.002)
-           self.reward[i]= 100*np.exp(-0.01*np.sum(self.station_ch[action[i]]))
+           self.reward[i]= -0.01*np.sum(self.station_ch[action[i]])
 
            #self.reward[self.j]=10
            self.average_distance.append(self.distance[i])
@@ -452,12 +452,12 @@ else:
         reward = np.clip(reward, args.reward_clip, -args.reward_clip)  # Clip rewards
       mem[i].append(state[i], actions[i], reward[i], done[i])  # Append transition to memory
 
-      # Train and test
-      if T >= args.learn_start:
-        mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
-        for i in range(n_ev):
-          if T % args.replay_frequency == 0:
-            dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
+   # Train and test
+   if T >= args.learn_start:
+      mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
+      for i in range(n_ev):
+        if T % args.replay_frequency == 0:
+          dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
       
    if (T >= args.learn_start and T % args.evaluation_interval == 0):
       for i in range(n_ev):
