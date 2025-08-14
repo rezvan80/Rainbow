@@ -217,12 +217,12 @@ class charging_stationEnv5(gym.Env):
         self.test=False
         self.iteration= 0
         self.reward=[0]*n_ev
-        self.state=[[0]*70]*n_ev
+        self.state=[[0]*17]*n_ev
         self.done=[False]*n_ev
         self.average_reward=[0]
         # Define action and observation spaces
         self.action_space =spaces.Discrete(3)  # One action per node
-        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(70,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(17,), dtype=np.float32)
         self.travel_times=[0]*n_ev
         self.action=[0]*n_ev
 
@@ -251,7 +251,7 @@ class charging_stationEnv5(gym.Env):
 
           self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) ,np.array([self.desierd_soc[i]-self.current_soc[i]]), np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
           #self.state[self.j]=model.wv[str(self.current_node[self.j])]
-          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.current_soc[i]-self.desierd_soc[i]]) , np.array(self.node))  , axis=0)
+          self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.current_soc[i]-self.desierd_soc[i]]) )  , axis=0)
           #
           #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])] ) , axis=0))
           #self.state[self.j]=np.array(self.fcc[self.j])
@@ -338,7 +338,7 @@ class charging_stationEnv5(gym.Env):
         self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1) , np.array([self.desierd_soc[i]-self.current_soc[i]]) , np.array(self.desierd_soc)-np.array(self.current_soc) ) ,axis=0)
         #self.state[self.j]=model.wv[str(self.current_node[self.j])]
         #self.state[self.j]=np.array(charging_time(self.station_arr , self.charging_time))
-        self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.desierd_soc[i]-self.current_soc[i]]) , np.array(self.node)) , axis=0)
+        self.state[i]=np.concatenate((model.wv[str(self.current_node[i])],np.array([self.desierd_soc[i]-self.current_soc[i]]) ) , axis=0)
 
         #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])],np.array([self.current_soc[self.j]]),np.array([self.desierd_soc[self.j]])) , axis=0))
         #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) ,axis=0)
