@@ -28,22 +28,22 @@ parser.add_argument('--max-episode-length', type=int, default=int(108e3), metava
 parser.add_argument('--history-length', type=int, default=1, metavar='T', help='Number of consecutive states processed')
 parser.add_argument('--architecture', type=str, default='canonical', choices=['canonical', 'data-efficient'], metavar='ARCH', help='Network architecture')
 parser.add_argument('--hidden-size', type=int, default=64, metavar='SIZE', help='Network hidden size')
-parser.add_argument('--noisy-std', type=float, default=0.5, metavar='σ', help='Initial standard deviation of noisy linear layers')
+parser.add_argument('--noisy-std', type=float, default=0.1, metavar='σ', help='Initial standard deviation of noisy linear layers')
 parser.add_argument('--atoms', type=int, default=15, metavar='C', help='Discretised size of value distribution')
-parser.add_argument('--V-min', type=float, default=-10, metavar='V', help='Minimum of value distribution support')
-parser.add_argument('--V-max', type=float, default=10, metavar='V', help='Maximum of value distribution support')
+parser.add_argument('--V-min', type=float, default=-30, metavar='V', help='Minimum of value distribution support')
+parser.add_argument('--V-max', type=float, default=0, metavar='V', help='Maximum of value distribution support')
 parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
 parser.add_argument('--memory-capacity', type=int, default=int(1e6), metavar='CAPACITY', help='Experience replay memory capacity')
-parser.add_argument('--replay-frequency', type=int, default=4, metavar='k', help='Frequency of sampling from memory')
+parser.add_argument('--replay-frequency', type=int, default=40, metavar='k', help='Frequency of sampling from memory')
 parser.add_argument('--priority-exponent', type=float, default=0.5, metavar='ω', help='Prioritised experience replay exponent (originally denoted α)')
 parser.add_argument('--priority-weight', type=float, default=0.4, metavar='β', help='Initial prioritised experience replay importance sampling weight')
 parser.add_argument('--multi-step', type=int, default=3, metavar='n', help='Number of steps for multi-step return')
 parser.add_argument('--discount', type=float, default=0.99, metavar='γ', help='Discount factor')
-parser.add_argument('--target-update', type=int, default=int(80), metavar='τ', help='Number of steps after which to update target network')
+parser.add_argument('--target-update', type=int, default=int(800), metavar='τ', help='Number of steps after which to update target network')
 parser.add_argument('--reward-clip', type=int, default=10, metavar='VALUE', help='Reward clipping (0 to disable)')
 parser.add_argument('--learning-rate', type=float, default=0.0001, metavar='η', help='Learning rate')
 parser.add_argument('--adam-eps', type=float, default=1.5e-4, metavar='ε', help='Adam epsilon')
-parser.add_argument('--batch-size', type=int, default=256, metavar='SIZE', help='Batch size')
+parser.add_argument('--batch-size', type=int, default=32, metavar='SIZE', help='Batch size')
 parser.add_argument('--norm-clip', type=float, default=10, metavar='NORM', help='Max L2 norm for gradient clipping')
 parser.add_argument('--learn-start', type=int, default=int(1000), metavar='STEPS', help='Number of steps before starting training')
 parser.add_argument('--evaluate', action='store_true', help='Evaluate only')
@@ -197,15 +197,15 @@ class charging_stationEnv5(gym.Env):
         self.desierd_soc=list(np.random.uniform(0.6, 0.8,n_ev ))
         self.current_soc=list(np.random.uniform(0.4, 0.6,n_ev ))
         self.current_node= random.sample(list(set(list(self.graph.nodes())) - set(self.charging_station_nodes)),n_ev )
-        self.desierd_soc=[0.69327472, 0.71491305, 0.70253482, 0.64029819, 0.7861011 ,
-        0.72377404, 0.66907586, 0.68648428, 0.72050732, 0.70266698,
-        0.73624628, 0.60573625, 0.79150536, 0.77703977, 0.75890208,
-        0.63177314, 0.74209745, 0.66636456, 0.77107797, 0.62668404]
-        self.current_soc=[0.51684445, 0.50067023, 0.53853516, 0.42557636, 0.46108417,
-        0.44697881, 0.55068407, 0.43465217, 0.47451146, 0.5875858 ,
-        0.5525329 , 0.43837829, 0.57131378, 0.47084906, 0.45499856,
-        0.54569187, 0.53936948, 0.52403585, 0.47374796, 0.59744536]
-        self.current_node=[7, 38, 33, 21, 0, 20, 25, 2, 12, 45, 11, 48, 15, 49, 40, 44, 52, 18, 27, 28]
+        #self.desierd_soc=[0.69327472, 0.71491305, 0.70253482, 0.64029819, 0.7861011 ,
+        #0.72377404, 0.66907586, 0.68648428, 0.72050732, 0.70266698,
+        #0.73624628, 0.60573625, 0.79150536, 0.77703977, 0.75890208,
+        #0.63177314, 0.74209745, 0.66636456, 0.77107797, 0.62668404]
+        #self.current_soc=[0.51684445, 0.50067023, 0.53853516, 0.42557636, 0.46108417,
+        #0.44697881, 0.55068407, 0.43465217, 0.47451146, 0.5875858 ,
+        #0.5525329 , 0.43837829, 0.57131378, 0.47084906, 0.45499856,
+        #0.54569187, 0.53936948, 0.52403585, 0.47374796, 0.59744536]
+        #self.current_node=[7, 38, 33, 21, 0, 20, 25, 2, 12, 45, 11, 48, 15, 49, 40, 44, 52, 18, 27, 28]
          #self.path = [self.start_node]  # Initialize path tracker
         # Initialize path tracker
         self.charging_time=np.array([0]*n_ev)
@@ -239,9 +239,9 @@ class charging_stationEnv5(gym.Env):
         0.5525329 , 0.43837829, 0.57131378, 0.47084906, 0.45499856,
         0.54569187, 0.53936948, 0.52403585, 0.47374796, 0.59744536][self.j]
         self.current_node[self.j]=[7, 38, 33, 21, 0, 20, 25, 2, 12, 45, 11, 48, 15, 49, 40, 44, 52, 18, 27, 28][self.j]
-        #self.desierd_soc[self.j]=list(np.random.uniform(0.6, 0.8,1 ))[0]
-        #self.current_soc[self.j]=list(np.random.uniform(0.4, 0.6,1 ))[0]
-        #self.current_node[self.j]= random.sample(list(set(list(self.graph.nodes())) - set(self.charging_station_nodes)),1 )[0]
+        self.desierd_soc[self.j]=list(np.random.uniform(0.6, 0.8,1 ))[0]
+        self.current_soc[self.j]=list(np.random.uniform(0.4, 0.6,1 ))[0]
+        self.current_node[self.j]= random.sample(list(set(list(self.graph.nodes())) - set(self.charging_station_nodes)),1 )[0]
 
         #self.path = [self.start_node]  # Reset path tracker
         self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])],model.wv[str(self.charging_station_nodes[0])],model.wv[str(self.charging_station_nodes[1])],model.wv[str(self.charging_station_nodes[2])] ,np.array([model.wv[str(node_id)] for node_id in self.current_node ]).reshape(-1)) ,axis=0)
@@ -277,7 +277,7 @@ class charging_stationEnv5(gym.Env):
         self.current_soc[self.j]=self.current_soc[self.j]-distance*0.0001
         self.charging_time[self.j]=(self.desierd_soc[self.j]-self.current_soc[self.j])/0.002
         self.iteration += 1
-        self.reward[self.j] = -0.01*distance
+        self.reward[self.j] = -0.001*distance
 
         self.distance[self.j]+=distance
         min_val = min(self.travel_times)
@@ -318,7 +318,7 @@ class charging_stationEnv5(gym.Env):
            ch=(self.desierd_soc[self.j]-self.current_soc[self.j])/0.001
            #self.reward[self.j]=10
            self.station_ch[action].append((self.desierd_soc[self.j]-self.current_soc[self.j])/0.002)
-           self.reward[self.j]=-0.01*np.sum(self.station_ch[action])
+           self.reward[self.j]=-0.001*np.sum(self.station_ch[action])
 
            #self.reward[self.j]=10
            self.average_distance.append(self.distance[self.j])
@@ -388,16 +388,16 @@ if args.model is not None and not args.evaluate:
     raise ValueError('Could not find memory file at {path}. Aborting...'.format(path=args.memory))
 
   mem = load_memory(args.memory, args.disable_bzip_memory)
-  #mem = [load_memory(args.memory, args.disable_bzip_memory) for _ in range(20)]
+  mem = [load_memory(args.memory, args.disable_bzip_memory) for _ in range(20)]
 else:
   mem = ReplayMemory(args, args.memory_capacity)
-  #mem = [ReplayMemory(args, args.memory_capacity) for _ in range(20)]
+  mem = [ReplayMemory(args, args.memory_capacity) for _ in range(20)]
 priority_weight_increase = (1 - args.priority_weight) / (args.T_max - args.learn_start)
 
 
 # Construct validation memory
 val_mem = ReplayMemory(args, args.evaluation_size)
-#val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
+val_mem = [ReplayMemory(args, args.evaluation_size) for _ in range(20)]
 T=0
 while T < args.evaluation_size:
  
@@ -422,7 +422,7 @@ while T < args.evaluation_size:
        next_state[i], _, done[i] , _ , _ = env.step(np.random.randint(0, action_space))
        next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
     
-       val_mem.append(state[i], -1, 0.0, done[i])
+       val_mem[i].append(state[i], -1, 0.0, done[i])
        state[i] = next_state[i]
  T += 1
 print(T)
@@ -459,7 +459,7 @@ else:
         if T % args.replay_frequency == 0:
           dqn[i].reset_noise()  # Draw a new set of noisy weights
 
-        actions[i] = dqn[0].act(state[i])  # Choose an action greedily (with noisy weights)
+        actions[i] = dqn[i].act(state[i])  # Choose an action greedily (with noisy weights)
           
         next_state[i], reward[i], done[i] , _ , _ = env.step(actions[i])  # Step
         next_state[i] = torch.tensor(next_state[i], dtype=torch.float32, device='cpu')
@@ -468,16 +468,10 @@ else:
           #reward = np.clip(reward, args.reward_clip, -args.reward_clip)  # Clip rewards
       
       
-        mem.append(state[i], actions[i], reward[i], done[i])  # Append transition to memory
+        mem[i].append(state[i], actions[i], reward[i], done[i])  # Append transition to memory
         state[i] = next_state[i]
    # Train and test
-   if T >= args.learn_start:
-      # for i in range(20):
-      mem.priority_weight = min(mem.priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
-      for i in range(n_ev):
-        if T % args.replay_frequency == 0:
-          dqn[0].learn(mem)  # Train with n-step distributional double-Q learning
-      
+
    if (T >= args.learn_start and T % 100 == 0):
       for i in range(n_ev):
         dqn[i].eval()  # Set DQN (online network) to evaluation mode
@@ -485,19 +479,41 @@ else:
       log('T = ' + str(T) + ' / ' + str(args.T_max) + ' | Avg. reward: ' + str(avg_reward) + ' | Avg. Q: ' + str(avg_Q) +str(env.average_reward) + str(env.average_distance))
       for i in range(n_ev):
         dqn[i].train()  # Set DQN (online network) back to training mode
-
+      
       # If memory path provided, save it
       if args.memory is not None:
        for i in range(20):
         save_memory(mem[i], args.memory, args.disable_bzip_memory)
+   if T >= args.learn_start:
       
+      #for i in range(20):
+      mem[i].priority_weight = min(mem[i].priority_weight + priority_weight_increase, 1)  # Anneal importance sampling weight β to 1
+      for i in range(n_ev):
+        if T % args.replay_frequency == 0:
+          dqn[i].learn(mem[i])  # Train with n-step distributional double-Q learning
+            
    # Update target network
    if (T>= args.learn_start and T % args.target_update == 0):
-        for i in range(n_ev):
+    for i in range(n_ev):
            dqn[i].update_target_net()
+    import copy
+    params_list = [ppo.online_net.state_dict() for ppo in dqn]
 
+    # Start with one agent's weights as base
+    avg_params = copy.deepcopy(params_list[0])
+
+    for key in avg_params.keys():
+      for i in range(1, len(params_list)):
+                avg_params[key] += params_list[i][key]
+      avg_params[key] /= len(params_list)
+    for i in range(20) :
+          dqn[i].online_net.load_state_dict(avg_params)
+          dqn[i].target_net.load_state_dict(avg_params)  
    # Checkpoint the network
    if (args.checkpoint_interval != 0) and (T % args.checkpoint_interval == 0):
+        dqn[i].save(results_dir, 'checkpoint.pth')
+
+ != 0) and (T % args.checkpoint_interval == 0):
         dqn[i].save(results_dir, 'checkpoint.pth')
 
  
