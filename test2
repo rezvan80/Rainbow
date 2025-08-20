@@ -164,7 +164,7 @@ class charging_stationEnv5(gym.Env):
         #self.state[self.j]=np.array(self.fcc[self.j])
         #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) , axis=0)
         self.distance[self.j]=0
-        return self.state[self.j] , {}
+        return 10*self.state[self.j] , {}
 
     def step(self , action ):
 
@@ -249,7 +249,7 @@ class charging_stationEnv5(gym.Env):
         #self.state[self.j]=np.array(np.concatenate((model.wv[str(self.current_node[self.j])],np.array([self.current_soc[self.j]]),np.array([self.desierd_soc[self.j]])) , axis=0))
         #self.state[self.j]=np.concatenate((model.wv[str(self.current_node[self.j])] , np.where(self.station_arr == None, 0, self.station_arr).reshape(-1)) ,axis=0)
 
-        return self.state[self.j] ,self.reward[self.j] ,self.done[self.j] ,  self.done[self.j] , {}
+        return 10*self.state[self.j] ,self.reward[self.j] ,self.done[self.j] ,  self.done[self.j] , {}
 
 
     def plot_path(self):
@@ -277,9 +277,8 @@ class charging_stationEnv5(gym.Env):
         ox.plot_graph(G, node_color=node_color , node_size=30, figsize=(10, 8))
 
 # Test DQN
-def test(args, T, dqn, val_mem, metrics, results_dir, evaluate=False):
+def test(args,env , T, dqn, val_mem, metrics, results_dir, evaluate=False):
   n_ev=20
-  env=charging_stationEnv5(G, charging_station_nodes , n_ev)
   state=[None]*n_ev
   action=[None]*n_ev
   done=[None]*n_ev
